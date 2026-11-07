@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Garimpo VIP - 1000 Lotes</title>
+    <style>
+        body { background-color: #090d16; color: #fff; font-family: sans-serif; margin: 0; padding: 10px; box-sizing: border-box; }
+        header { background: #1e293b; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 10px; }
+        h1 { font-size: 14px; color: #fbbf24; margin: 0; }
+        .btn { background: #d97706; color: #000; border: none; padding: 8px 12px; font-weight: bold; font-size: 12px; border-radius: 6px; cursor: pointer; margin: 2px; }
+        .btn-map { background: #2563eb; color: #fff; }
+        .btn-pix { background: #059669; color: #fff; }
+        .container { display: flex; gap: 10px; height: calc(100vh - 80px); }
+        .panel { background: #1e293b; padding: 10px; border-radius: 8px; flex: 1; overflow-y: auto; font-size: 12px; }
+        .center-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .garimpar-btn { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(to bottom, #fbbf24, #b45309); color: #000; font-weight: 900; border: 4px solid #fde68a; font-size: 14px; cursor: pointer; box-shadow: 0 10px 15px rgba(0,0,0,0.5); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; }
+        .modal-content { background: #1e293b; padding: 15px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; text-align: center; }
+        .grid-lotes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
+        .lote-item { background: #0f172a; padding: 8px; border-radius: 4px; cursor: pointer; border: 1px solid #334155; font-size: 10px; }
+        input, select { width: 100%; padding: 8px; background: #0f172a; color: #fbbf24; border: 1px solid #334155; margin-top: 5px; box-sizing: border-box; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>GARIMPO VIP (1000 LOTES)</h1>
+        <div>
+            <span style="color: #fbbf24;">Ouro: <strong id="txt-ouro">0</strong></span> | 
+            <span style="color: #38bdf8;">Gemas: <strong id="txt-gemas">10</strong></span>
+        </div>
+        <div>
+            <button class="btn btn-map" onclick="abrirMapa()">Mapa</button>
+            <button class="btn" onclick="abrirMercado()">Mercado</button>
+            <button class="btn btn-pix" onclick="abrirPix()">PIX</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- PAINEL 1 -->
+        <div class="panel">
+            <strong>Trabalho & Indústria</strong><br><br>
+            Carga: <span id="txt-carga" style="color: #38bdf8;">0 / 50 kg</span><br><br>
+            <button class="btn" style="width:100%; background:#059669; color:#fff;" onclick="descarregar()">Descarregar no Armazém</button>
+            <hr style="border-color:#334155; margin:10px 0;">
+            Picareta: <span id="txt-picareta" style="color: #22c55e;">100%</span><br><br>
+            <button class="btn" style="width:100%; background:#475569; color:#fff;" onclick="fabricar()">Fabricar Picareta (10 Ferro, 5 Madeira)</button>
+        </div>
+
+        <!-- PAINEL 2 (CENTRAL) -->
+        <div class="panel center-panel">
+            <div id="txt-lote-atual" style="color: #fbbf24; font-weight: bold; margin-bottom: 10px;">Lote #1 - Rio Solimões</div>
+            <button class="garimpar-btn" onclick="garimpar()">GARIMPAR</button>
+            <div id="txt-reserva" style="font-size: 10px; color: #94a3b8; margin-top: 10px;">Reserva: 5,000 kg</div>
+        </div>
+
+        <!-- PAINEL 3 -->
+        <div class="panel">
+            <strong>Armazém do Lote</strong><br><br>
+            Ouro Armazenado: <span id="arm-ouro" style="color:#fbbf24;">0</span><br>
+            Madeira: <span id="arm-madeira">0</span><br>
+            Ferro: <span id="arm-ferro">0</span><br>
+            Tábuas: <span id="arm-tabuas">0</span><br>
+            Lingotes: <span id="arm-lingotes">0</span><br><br>
+            <button class="btn" style="width:100%; background:#2563eb; color:#fff;" onclick="processarMadeira()">Cortar Tábuas (5 Mad.)</button>
+        </div>
+    </div>
+
+    <!-- MODAL MAPA 1000 LOTES -->
+    <div id="modal-mapa" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#38bdf8; margin-top:0;">Mapa Global (1.000 Lotes)</h3>
+            <input id="input-lote" type="number" min="1" max="1000" placeholder="Digite o número do lote (1 a 1000)">
+            <button class="btn btn-map" style="width:100%; margin-top:5px;" onclick="irParaLoteInput()">Ir para o Lote</button>
+            <div class="grid-lotes" id="grid-lotes">
+                <!-- Gerado por JS -->
+            </div>
+            <br><button class="btn" style="background:#ef4444; color:#fff;" onclick="fecharMapa()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- MODAL MERCADO -->
+    <div id="modal-mercado" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#fbbf24; margin-top:0;">Mercado Global</h3>
+            <p>Venda recursos processados por GoldGlory:</p>
+            <button class="btn" style="width:100%; margin-bottom:5px;" onclick="vender('tabuas')">Vender 1 Tábua (10 Gold)</button>
+            <button class="btn" style="width:100%;" onclick="vender('lingotes')">Vender 1 Lingote (25 Gold)</button>
+            <br><br><button class="btn" style="background:#ef4444; color:#fff;" onclick="fecharMercado()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- MODAL PIX -->
+    <div id="modal-pix" class="modal">
+        <div class="modal-content">
+            <h3 style="color:#22c55e; margin-top:0;">Loja PIX (Mercado Pago)</h3>
+            <button class="btn btn-pix" style="width:100%;" onclick="gerarPix(5.00, 50)">Comprar 50 Gemas (R$ 5,00)</button>
+            <br><br>
+            <input id="pix-copia" type="text" readonly placeholder="Código PIX Copia e Cola gerado">
+            <br><br><button class="btn" style="background:#ef4444; color:#fff;" onclick="fecharPix()">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        var estado = {
+            ouro: 0, gemas: 10, goldglory: 100,
+            carga: 0, capacidade: 50, picareta: 100,
+            loteId: 1, loteNome: "Rio Solimões", reserva: 5000,
+            armOuro: 0, armMadeira: 0, armFerro: 0, armTabuas: 0, armLingotes: 0
+        };
+
+        var regioes = ["Rio Solimões", "Serra Pelada", "Tapajós", "Guiana", "Xingu"];
+
+        function construirMapa() {
+            var html = "";
+            for (var i = 1; i <= 1000; i++) {
+                var reg = regioes[i % regioes.length];
+                html += '<div class="lote-item" onclick="selecionarLote(' + i + ', \'' + reg + '\')"><strong>#' + i + '</strong><br>' + reg + '</div>';
+            }
+            document.getElementById('grid-lotes').innerHTML = html;
+        }
+
+        function atualizarTela() {
+            document.getElementById('txt-ouro').innerText = estado.ouro;
+            document.getElementById('txt-gemas').innerText = estado.gemas;
+            document.getElementById('txt-carga').innerText = estado.carga + " / " + estado.capacidade + " kg";
+            document.getElementById('txt-picareta').innerText = estado.picareta + "%";
+            document.getElementById('txt-lote-atual').innerText = "Lote #" + estado.loteId + " - " + estado.loteNome;
+            document.getElementById('txt-reserva').innerText = "Reserva: " + estado.reserva + " kg";
+
+            document.getElementById('arm-ouro').innerText = estado.armOuro;
+            document.getElementById('arm-madeira').innerText = estado.armMadeira;
+            document.getElementById('arm-ferro').innerText = estado.armFerro;
+            document.getElementById('arm-tabuas').innerText = estado.armTabuas;
+            document.getElementById('arm-lingotes').innerText = estado.armLingotes;
+        }
+
+        function garimpar() {
+            if (estado.picareta <= 0) { alert("A picareta partiu!"); return; }
+            if (estado.carga >= estado.capacidade) { alert("Carga cheia! Descarregue no armazém."); return; }
+            if (estado.reserva <= 0) { alert("Lote esgotado!"); return; }
+
+            estado.ouro = estado.ouro + 3;
+            estado.carga = estado.carga + 5;
+            estado.reserva = estado.reserva - 5;
+            estado.picareta = estado.picareta - 5;
+            if (Math.random() > 0.5) estado.madeira = estado.madeira + 1;
+            if (Math.random() > 0.7) estado.ferro = estado.ferro + 1;
+            atualizarTela();
+        }
+
+        function descarregar() {
+            estado.armOuro = estado.armOuro + estado.ouro;
+            estado.armMadeira = estado.armMadeira + estado.madeira;
+            estado.armFerro = estado.armFerro + estado.armFerro;
+            estado.ouro = 0; estado.madeira = 0; estado.ferro = 0; estado.carga = 0;
+            atualizarTela();
+            alert("Recursos descarregados com sucesso!");
+        }
+
+        function fabricar() {
+            if (estado.armFerro >= 10 && estado.armMadeira >= 5) {
+                estado.armFerro = estado.armFerro - 10;
+                estado.armMadeira = estado.armMadeira - 5;
+                estado.picareta = 100;
+                atualizarTela();
+                alert("Nova picareta fabricada!");
+            } else {
+                alert("Necessário 10 de ferro e 5 de madeira no armazém.");
+            }
+        }
+
+        function processarMadeira() {
+            if (estado.armMadeira >= 5) {
+                estado.armMadeira = estado.armMadeira - 5;
+                estado.armTabuas = estado.armTabuas + 1;
+                atualizarTela();
+                alert("Tábua produzida!");
+            } else {
+                alert("Madeira insuficiente.");
+            }
+        }
+
+        function abrirMapa() { document.getElementById('modal-mapa').style.display = 'flex'; }
+        function fecharMapa() { document.getElementById('modal-mapa').style.display = 'none'; }
+        
+        function selecionarLote(id, nome) {
+            estado.loteId = id;
+            estado.loteNome = nome;
+            estado.reserva = 5000 + (id * 5);
+            fecharMapa();
+            atualizarTela();
+            alert("Mudou para o Lote #" + id);
+        }
+
+        function irParaLoteInput() {
+            var val = parseInt(document.getElementById('input-lote').value);
+            if (val >= 1 && val <= 1000) {
+                selecionarLote(val, regioes[val % regioes.length]);
+            } else {
+                alert("Insira um número entre 1 e 1000.");
+            }
+        }
+
+        function abrirMercado() { document.getElementById('modal-mercado').style.display = 'flex'; }
+        function fecharMercado() { document.getElementById('modal-mercado').style.display = 'none'; }
+
+        function vender(tipo) {
+            if (tipo == 'tabuas' && estado.armTabuas > 0) {
+                estado.armTabuas--;
+                estado.goldglory += 10;
+                alert("Tábuas vendidas!");
+            } else if (tipo == 'lingotes' && estado.armLingotes > 0) {
+                estado.armLingotes--;
+                estado.goldglory += 25;
+                alert("Lingotes vendidos!");
+            } else {
+                alert("Não tens este item processado.");
+            }
+            atualizarTela();
+        }
+
+        function abrirPix() { document.getElementById('modal-pix').style.display = 'flex'; }
+        function fecharPix() { document.getElementById('modal-pix').style.display = 'none'; }
+
+        function gerarPix(valor, qtd) {
+            // Simulação estável para ambiente web estático (GitHub Pages)
+            var codigoSimulado = "00020126580014br.gov.bcb.pix013612345678-1234-1234-1234-1234567890ab5204000053039865802BR5925Garimpo VIP Pagamentos6009Sao Paulo62070503***6304ABCD";
+            document.getElementById('pix-copia').value = codigoSimulado;
+            alert("Código PIX gerado com sucesso para teste!");
+            
+            // Simula a entrega das gemas após o pagamento fictício
+            setTimeout(function() {
+                estado.gemas += qtd;
+                atualizarTela();
+            }, 3000);
+        }
+
+        construirMapa();
+        atualizarTela();
+    </script>
+</body>
+</html>
